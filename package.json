@@ -256,8 +256,8 @@
     "yargs-parser": "^21.0.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "jest",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

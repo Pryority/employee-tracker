@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const dbName = 'employee';
 
 // Connect to database
 const db = mysql.createConnection(
@@ -7,10 +8,10 @@ const db = mysql.createConnection(
         // Your MySQL username,
         user: 'root',
         // Your MySQL password
-        password: 'pass',
+        password: 'password',
         database: 'db'
     },
-    console.log('Connected to the election database.')
+    console.log(`Connected to the ${dbName} database.`)
 );
 
 module.exports = db;
