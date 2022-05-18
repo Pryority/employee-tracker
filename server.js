@@ -45,3 +45,26 @@ function run() {
         }
     })
 };
+
+function view() {
+    inquirer.prompt({
+        type: 'list',
+        name: 'view',
+        message: 'Please select an option to view registered Employees:',
+        choices: ['ALL EMPLOYEES', 'BY DEPARTMENT', 'BY ROLE']
+    }).then(function (res) {
+        switch (res.view) {
+            case 'ALL EMPLOYEES':
+                viewAllEmployees();
+                break;
+            case 'BY DEPARTMENT':
+                viewByDepartment();
+                break;
+            case 'BY ROLE':
+                viewByRole();
+                break;
+            default:
+                console.log('Default option chosen')
+        }
+    })
+}
