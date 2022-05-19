@@ -3,17 +3,6 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 const db = require('./db/database');
 const dbName = 'employee';
-// const employeeObject = { first_name, last_name, role_id, department_id, manager }
-const express = require('express');
-const { choices } = require('yargs');
-const router = express.Router();
-// const apiRoutes = require('routes/apiRoutes')
-const app = express();
-
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-// app.use('/api', apiRoutes);
 
 function run() {
     inquirer.prompt(
@@ -74,47 +63,58 @@ function add() {
     });
 }
 function addEmployee() {
-    inquirer.prompt(
-        [
-            {
-                name: 'first_name',
-                type: 'input',
-                message: `What is the employee's FIRST NAME?`
-            },
-            {
-                name: 'last_name',
-                type: 'input',
-                message: `What is the employee's LAST NAME?`
-            },
-            {
-                name: 'role_id',
-                type: 'list',
-                message: `What is the employee's ROLE?`,
-                // could make this dynamically generated later
-                choices: ['SALESPERSON', 'JUNIOR ENGINEER', 'LEAD ENGINEER', 'ACCOUNT MANAGER']
-            },
-            {
-                name: 'manager_id',
-                type: 'number',
-                message: `What is the employee's MANAGER ID?`,
-                validate: (value) => {
-                    if (isNaN(value) === false) {
-                        return true;
-                    }
-                    return false;
-                },
-                default: 1
-            },
-        ]
-    ).then(function ({ first_name, last_name, role_id, manager_id }) {
-        const e_fields = [first_name, last_name, role_id, manager_id];
-        const sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?";
+    // this is getting the roles and changes the array to have name and value pairs instead of the format of the schema
+    db.promise().query('SELECT * FROM employee').then(([rows]) => {
+        let employeeChoices = rows.map(user => {
+            return { name: user.first_name + ' ' + user.last_name, value: user.id }
+        })
 
-        db.query(sql, e_fields, function (err, res, fields) {
-            if (err) throw err;
-            console.table(res);
+        // role choices
+        db.promise().query('SELECT * FROM role').then(([rows]) => {
+            let roleChoices = rows.map(role => {
+                return { name: role.title, value: role.id }
+            });
+
+            inquirer.prompt(
+                [
+                    {
+                        name: 'first_name',
+                        type: 'input',
+                        message: `What is the employee's FIRST NAME?`
+                    },
+                    {
+                        name: 'last_name',
+                        type: 'input',
+                        message: `What is the employee's LAST NAME?`
+                    },
+                    {
+                        name: 'role_id',
+                        type: 'list',
+                        message: `What is the employee's ROLE?`,
+                        // could make this dynamically generated later
+                        choices: roleChoices
+                    },
+                    {
+                        name: 'manager_id',
+                        type: 'list',
+                        message: `What is the employee's MANAGER ID?`,
+                        choices: employeeChoices,
+                    },
+                ]
+            ).then(function (answers) {
+                // const e_fields = [first_name, last_name, role_id, manager_id];
+                const sql = "INSERT INTO employee SET ?";
+
+                db.query(sql, answers, function (err, res, fields) {
+                    if (err) throw err;
+                    console.log('Employee added to database.');
+                    handleReturn();
+                });
+            });
         });
     });
+
+
 };
 function addRole() {
     console.log(`Rendering add role UI`)
@@ -194,7 +194,56 @@ function update() {
 
 }
 function updateByEmployee() {
-    console.log(`Rendering update employee UI`)
+    // db.promise().query('SELECT * FROM employee').then(([rows]) => {
+    //     let employeeChoices = rows.map(user => {
+    //         return { name: user.first_name + ' ' + user.last_name, value: user.id }
+    //     })
+
+    //     // Add inquirer prompt here
+    //     inquirer.prompt(
+    //         [
+    //             {
+    //                 name: 'role_id',
+    //                 type: 'list',
+    //                 message: `What is the employee's ROLE?`,
+    //                 // could make this dynamically generated later
+    //                 choices: roleChoices
+    //             },
+    //         ]
+    //     )
+    //     // Add query here within prompts .then
+
+
+    //     // asks inquirer prompt which user to update --> pass in the employee choices here
+    //     db.promise().query('SELECT * FROM role').then(([rows]) => {
+    //         let roleChoices = rows.map(role => {
+    //             return { name: role.title, value: role.id }
+    //         });
+    //         inquirer.prompt(
+    //             [
+    //                 {
+    //                     name: 'role_id',
+    //                     type: 'list',
+    //                     message: `What is the employee's ROLE?`,
+    //                     // could make this dynamically generated later
+    //                     choices: roleChoices
+    //                 },
+    //             ]
+    //         ).then(function (answers) {
+    //             //change this sql syntax to update functionality
+    //             const sql = "INSERT INTO employee SET ?";
+
+    //             db.query(sql, answers, function (err, res, fields) {
+    //                 if (err) throw err;
+    //                 console.log('Employee added to database.');
+    //                 handleReturn();
+    //             });
+    //         });
+    //     });
+    // });
+    // ask the employee choices, then add the inquirer prompt into the query function
+    // will need to get the employee choices
+    // choose employee, then ask another prompt question "which role do you want to assign?", 
 };
 function updateByRole() {
     console.log(`Rendering update role UI`)
