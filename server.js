@@ -3,7 +3,9 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 const db = require('./db/database');
 const dbName = 'employee';
+// const employeeObject = { first_name, last_name, role_id, department_id, manager }
 const express = require('express');
+const { choices } = require('yargs');
 const router = express.Router();
 // const apiRoutes = require('routes/apiRoutes')
 const app = express();
@@ -72,24 +74,46 @@ function add() {
     });
 }
 function addEmployee() {
-    inquirer.prompt({
-        type: 'input',
-        name: 'addEmployee',
-        message: `What is the employee's name?`,
-    }).then(function (res) {
-        switch (res.add) {
-            case 'EMPLOYEE':
-                addEmployee();
-                break;
-            case 'ROLE':
-                addRole();
-                break;
-            case 'DEPARTMENT':
-                addDepartment();
-                break;
-            default:
-                console.log('Default option chosen')
-        }
+    inquirer.prompt(
+        [
+            {
+                name: 'first_name',
+                type: 'input',
+                message: `What is the employee's FIRST NAME?`
+            },
+            {
+                name: 'last_name',
+                type: 'input',
+                message: `What is the employee's LAST NAME?`
+            },
+            {
+                name: 'role_id',
+                type: 'list',
+                message: `What is the employee's ROLE?`,
+                // could make this dynamically generated later
+                choices: ['SALESPERSON', 'JUNIOR ENGINEER', 'LEAD ENGINEER', 'ACCOUNT MANAGER']
+            },
+            {
+                name: 'manager_id',
+                type: 'number',
+                message: `What is the employee's MANAGER ID?`,
+                validate: (value) => {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                },
+                default: 1
+            },
+        ]
+    ).then(function ({ first_name, last_name, role_id, manager_id }) {
+        const e_fields = [first_name, last_name, role_id, manager_id];
+        const sql = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?";
+
+        db.query(sql, e_fields, function (err, res, fields) {
+            if (err) throw err;
+            console.table(res);
+        });
     });
 };
 function addRole() {
@@ -167,26 +191,7 @@ function viewByRole() {
 /// ----------------
 /// UPDATE FUNCTIONS
 function update() {
-    inquirer.prompt({
-        type: 'list',
-        name: 'view',
-        message: 'Please select an option to view registered Employees:',
-        choices: ['ALL EMPLOYEES', 'BY DEPARTMENT', 'BY ROLE']
-    }).then(function (res) {
-        switch (res.view) {
-            case 'ALL EMPLOYEES':
-                updateByEmployee();
-                break;
-            case 'BY DEPARTMENT':
-                updateByDepartment();
-                break;
-            case 'BY ROLE':
-                updateByRole();
-                break;
-            default:
-                console.log('Default option chosen')
-        }
-    })
+
 }
 function updateByEmployee() {
     console.log(`Rendering update employee UI`)
@@ -207,13 +212,13 @@ function remove() {
         choices: ['EMPLOYEE', 'DEPARTMENT', 'ROLE']
     }).then(function (res) {
         switch (res.delete) {
-            case 'ALL EMPLOYEES':
+            case 'EMPLOYEE':
                 deleteByEmployee();
                 break;
-            case 'BY DEPARTMENT':
+            case 'DEPARTMENT':
                 deleteByDepartment();
                 break;
-            case 'BY ROLE':
+            case 'ROLE':
                 deleteByRole();
                 break;
             default:
