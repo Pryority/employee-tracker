@@ -129,19 +129,40 @@ function view() {
         }
     })
 }
+
+const handleReturn = () => {
+    inquirer.prompt({
+        name: 'chooseReturn',
+        type: 'confirm',
+        message: 'Would you like to RETURN?',
+    }).then(function (res) {
+        if (!res.chooseReturn) {
+            console.log(`Select YES or 'Y' to return to the start of the application.`)
+        }
+        run();
+    })
+}
+
 function viewAllEmployees() {
-    // db.query(`SELECT * FROM employee;`)
     db.query("SELECT * FROM employee", function (err, result, fields) {
         if (err) throw err;
         console.table(result);
-    });
-
+        handleReturn();
+    })
 };
 function viewByDepartment() {
-    console.log(`Displaying all departments`)
+    db.query("SELECT * FROM department", function (err, result, fields) {
+        if (err) throw err;
+        console.table(result);
+        handleReturn();
+    })
 };
 function viewByRole() {
-    console.log(`Displaying all roles`)
+    db.query("SELECT * FROM role", function (err, result, fields) {
+        if (err) throw err;
+        console.table(result);
+        handleReturn();
+    })
 };
 /// ----------------
 /// UPDATE FUNCTIONS
