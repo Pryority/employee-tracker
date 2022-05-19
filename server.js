@@ -1,30 +1,17 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-const db = require('./db/connection');
+const db = require('./db/database');
+const dbName = 'employee';
 const express = require('express');
-const PORT = process.env.PORT || 3001;
+const router = express.Router();
+// const apiRoutes = require('routes/apiRoutes')
 const app = express();
 
 app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-
-db.connect(function (err) {
-    app.get('/api/employees', (req, res) => {
-        const sql = `SELECT * FROM employees`;
-        connection.db.query(sql, (err, rows) => {
-            if (err) {
-                res.status(500).json({ error: err.message });
-                return;
-            }
-            res.json({
-                message: 'success',
-                data: rows
-            });
-        });
-    });
-});
+// app.use('/api', apiRoutes);
 
 function run() {
     inquirer.prompt(
@@ -82,16 +69,41 @@ function add() {
             default:
                 console.log('Default option chosen')
         }
-    })
+    });
 }
 function addEmployee() {
-    console.log(`Rendering add employee UI`)
+    inquirer.prompt({
+        type: 'input',
+        name: 'addEmployee',
+        message: `What is the employee's name?`,
+    }).then(function (res) {
+        switch (res.add) {
+            case 'EMPLOYEE':
+                addEmployee();
+                break;
+            case 'ROLE':
+                addRole();
+                break;
+            case 'DEPARTMENT':
+                addDepartment();
+                break;
+            default:
+                console.log('Default option chosen')
+        }
+    });
 };
 function addRole() {
     console.log(`Rendering add role UI`)
 };
 function addDepartment() {
-    console.log(`Rendering add department UI`)
+
+    inquirer.prompt({
+        type: 'input',
+        name: 'addEmployee',
+        message: `What is the DEPARTMENT name?`,
+    }).then(function (res) {
+        db.query();
+    });
 };
 /// ----------------
 /// READ FUNCTIONS
@@ -118,7 +130,12 @@ function view() {
     })
 }
 function viewAllEmployees() {
-    console.log(`Displaying all employees`)
+    // db.query(`SELECT * FROM employee;`)
+    db.query("SELECT * FROM employee", function (err, result, fields) {
+        if (err) throw err;
+        console.table(result);
+    });
+
 };
 function viewByDepartment() {
     console.log(`Displaying all departments`)
@@ -194,5 +211,5 @@ function deleteByRole() {
 };
 /// ----------------
 
-
 run();
+
