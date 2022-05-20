@@ -200,7 +200,7 @@ function update() {
     }).then(function (res) {
         switch (res.update) {
             case 'EMPLOYEE':
-                getEmployee();
+                updateEmployee();
                 // updateEmployee();
                 break;
             case 'ROLE':
@@ -216,8 +216,7 @@ function update() {
         }
     });
 }
-function getEmployee() {
-
+function updateEmployee() {
     db.promise().query('SELECT * FROM employee').then(([rows]) => {
         let employeeChoices = rows.map(employee => {
             return {
@@ -233,12 +232,24 @@ function getEmployee() {
                 message: `Select the EMPLOYEE you would like to update.`,
                 choices: employeeChoices
 
-            }]).then(function (res) {
+            }])
+            .then(function (res) {
                 db.promise().query('SELECT * FROM role').then(([rows]) => {
                     let roleChoices = rows.map(role => {
                         return { name: role.title, value: role.id }
                     });
 
+                    const updateRoleId = function (roleChoice) {
+                        console.log(roleChoice.role_id);
+                        const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
+                        db.query(sql, [roleChoice.role_id, res.employee], function (err, res, fields) {
+                            if (err)
+                                throw err;
+                            console.table(res.info);
+                            console.log('Employee updated.');
+                            handleReturn();
+                        });
+                    };
                     inquirer.prompt(
                         {
                             name: 'role_id',
@@ -246,51 +257,12 @@ function getEmployee() {
                             message: `Select the employee's new ROLE.`,
                             choices: roleChoices
                         })
-                        .then(function (roleChoice) {
-                            console.log(roleChoice.role_id)
-                            const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
-                            db.query(sql, [roleChoice.role_id, res.employee], function (err, res, fields) {
-                                if (err) throw err;
-                                console.table(res.info)
-                                console.log('Employee updated.');
-                                handleReturn();
-                            });
-
-                        });
-
+                        .then(updateRoleId);
                 });
             });
     });
 };
 
-// function updateEmployee() {
-//     db.promise().query('SELECT * FROM employee').then(([rows]) => {
-//         let employeeChoices = rows.map(user => {
-//             return { name: user.first_name + ' ' + user.last_name, value: user.id }
-//         })
-
-//         // Add inquirer prompt here
-//         // Add query here within prompts .then
-//         // asks inquirer prompt which user to update --> pass in the employee choices here
-//         // db.promise().query('SELECT * FROM role').then(([rows]) => {
-//         //     let roleChoices = rows.map(role => {
-//         //         return { name: role.title, value: role.id }
-//         //     }).then(function (answers) {
-//         //         //change this sql syntax to update functionality
-//         //         const sql = "ALTER employee SET ?";
-
-//         //         db.query(sql, answers, function (err, res, fields) {
-//         //             if (err) throw err;
-//         //             console.log('Employee added to database.');
-//         //             handleReturn();
-//         //         });
-//         //     });
-//         // });
-//     });
-//     // ask the employee choices, then add the inquirer prompt into the query function
-//     // will need to get the employee choices
-//     // choose employee, then ask another prompt question "which role do you want to assign?", 
-// };
 function updateRole() {
     console.log(`Rendering update role UI`)
 };
