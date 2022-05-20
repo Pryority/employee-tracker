@@ -101,11 +101,11 @@ function addEmployee() {
                         choices: employeeChoices,
                     },
                 ]
-            ).then(function (answers) {
-                console.log(answers)
+            ).then(function (ress) {
+                console.log(ress)
                 const sql = "INSERT INTO employee SET ?";
 
-                db.query(sql, answers, function (err, res, fields) {
+                db.query(sql, ress, function (err, res, fields) {
                     if (err) throw err;
                     console.log('Employee added to database.');
                     handleReturn();
@@ -204,7 +204,6 @@ function update() {
                 updateRole();
                 break;
             case 'DEPARTMENT':
-                getDepartment();
                 updateDepartment();
                 break;
             default:
@@ -273,29 +272,93 @@ function updateRole() {
                 choices: roleChoices
             }])
             .then(function (res) {
-                console.log(res)
-                const updateRoleType = function (roleType) {
+                const updateName = function (answer) {
                     const sql = 'UPDATE role SET title = ? WHERE id = ?';
-                    db.query(sql, [roleType.newName, res.role], function (err, res, fields) {
-                        if (err)
-                            throw err;
+                    db.query(sql, [answer.newName, res.role], function (err, res, fields) {
+                        if (err) throw err;
                         console.table(res.info);
-                        console.log('Role updated.');
-                        handleReturn();
+                        console.log('Role NAME updated.');
                     });
+
+                    const updateSalary = function (answer) {
+                        console.log(answer)
+                        const sql = 'UPDATE role SET salary = ? WHERE id = ?';
+                        db.query(sql, [answer.newSalary, res.role], function (err, res, fields) {
+                            if (err) throw err;
+                            console.table(res.info);
+                            console.log('Role SALARY updated.');
+                            handleReturn();
+                        });
+                    };
+
+                    inquirer.prompt(
+                        {
+                            name: 'newSalary',
+                            type: 'input',
+                            message: `Enter the new SALARY of the role.`,
+                        })
+                        .then(updateSalary)
                 };
                 inquirer.prompt(
                     {
                         name: 'newName',
                         type: 'input',
-                        message: `What is the name of the new ROLE.`,
-                    })
-                    .then(updateRoleType);
+                        message: `Enter the new NAME of the role.`,
+                    }).then(updateName)
             });
     });
 };
 function updateDepartment() {
-    console.log(`Rendering update department UI`)
+    db.promise().query('SELECT * FROM department').then(([rows]) => {
+        let departmentChoices = rows.map(department => {
+            return { name: department.name, value: department.id }
+        });
+
+        inquirer.prompt(
+            [{
+                name: 'department',
+                type: 'list',
+                message: `Select the DEPARTMENT you would like to update.`,
+                choices: departmentChoices
+            }]).then(function (res) {
+                console.log(res)
+                const updateName = function (answer) {
+                    console.log(answer)
+                    const sql = 'UPDATE department SET name = ? WHERE id = ?';
+                    db.query(sql, [answer.newDepartment, res.role], function (err, res, fields) {
+                        if (err) throw err;
+                        console.table(res.info);
+                        console.log('Department NAME updated.');
+                    });
+
+                    const updateDepartmentId = function (answer) {
+                        console.log('Department ID: ', answer)
+                        const sql = 'UPDATE department SET id = ? WHERE id = ?';
+                        db.query(sql, [answer.newId, res.role], function (err, res, fields) {
+                            if (err) throw err;
+                            console.table(res.info);
+                            console.log('Department ID updated.');
+                            handleReturn();
+                        });
+                    };
+
+                    inquirer.prompt(
+                        {
+                            name: 'newId',
+                            type: 'number',
+                            message: `Enter the new ID of the department.`,
+                        })
+                        .then(updateDepartmentId)
+                };
+
+                inquirer.prompt(
+                    {
+                        name: 'newName',
+                        type: 'input',
+                        message: `Enter the new NAME of the department.`,
+                    }).then(updateName)
+            });
+    });
 };
 /// ----------------
 /// DELETE FUNCTIONS
