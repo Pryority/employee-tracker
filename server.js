@@ -62,7 +62,6 @@ function add() {
         }
     });
 }
-
 function addEmployee() {
     // this is getting the roles and changes the array to have name and value pairs instead of the format of the schema
     db.promise().query('SELECT * FROM employee').then(([rows]) => {
@@ -154,7 +153,6 @@ function view() {
         }
     })
 }
-
 const handleReturn = () => {
     inquirer.prompt({
         name: 'chooseReturn',
@@ -167,7 +165,6 @@ const handleReturn = () => {
         run();
     })
 }
-
 function viewAllEmployees() {
     db.query("SELECT * FROM employee", function (err, result, fields) {
         if (err) throw err;
@@ -204,7 +201,6 @@ function update() {
                 // updateEmployee();
                 break;
             case 'ROLE':
-                getRole();
                 updateRole();
                 break;
             case 'DEPARTMENT':
@@ -264,7 +260,39 @@ function updateEmployee() {
 };
 
 function updateRole() {
-    console.log(`Rendering update role UI`)
+    db.promise().query('SELECT * FROM role').then(([rows]) => {
+        let roleChoices = rows.map(role => {
+            return { name: role.title, value: role.id }
+        });
+
+        inquirer.prompt(
+            [{
+                name: 'role',
+                type: 'list',
+                message: `Select the ROLE you would like to update.`,
+                choices: roleChoices
+            }])
+            .then(function (res) {
+                console.log(res)
+                const updateRoleType = function (roleType) {
+                    const sql = 'UPDATE role SET title = ? WHERE id = ?';
+                    db.query(sql, [roleType.newName, res.role], function (err, res, fields) {
+                        if (err)
+                            throw err;
+                        console.table(res.info);
+                        console.log('Role updated.');
+                        handleReturn();
+                    });
+                };
+                inquirer.prompt(
+                    {
+                        name: 'newName',
+                        type: 'input',
+                        message: `What is the name of the new ROLE.`,
+                    })
+                    .then(updateRoleType);
+            });
+    });
 };
 function updateDepartment() {
     console.log(`Rendering update department UI`)
