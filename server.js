@@ -166,7 +166,7 @@ const handleReturn = () => {
     })
 }
 function viewAllEmployees() {
-    db.query("SELECT * FROM employee", function (err, result, fields) {
+    db.query("SELECT * FROM employee LEFT JOIN role ON employee.id = role.id", function (err, result, fields) {
         if (err) throw err;
         console.table(result);
         handleReturn();
@@ -257,7 +257,6 @@ function updateEmployee() {
             });
     });
 };
-
 function updateRole() {
     db.promise().query('SELECT * FROM role').then(([rows]) => {
         let roleChoices = rows.map(role => {
@@ -323,14 +322,12 @@ function updateDepartment() {
             }]).then(function (res) {
                 console.log(res)
                 const updateName = function (answer) {
-                    console.log(answer)
                     const sql = 'UPDATE department SET name = ? WHERE id = ?';
                     db.query(sql, [answer.newDepartment, res.role], function (err, res, fields) {
                         if (err) throw err;
                         console.table(res.info);
                         console.log('Department NAME updated.');
                     });
-
                     const updateDepartmentId = function (answer) {
                         console.log('Department ID: ', answer)
                         const sql = 'UPDATE department SET id = ? WHERE id = ?';
@@ -341,7 +338,6 @@ function updateDepartment() {
                             handleReturn();
                         });
                     };
-
                     inquirer.prompt(
                         {
                             name: 'newId',
@@ -350,7 +346,6 @@ function updateDepartment() {
                         })
                         .then(updateDepartmentId)
                 };
-
                 inquirer.prompt(
                     {
                         name: 'newName',
