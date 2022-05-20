@@ -69,7 +69,6 @@ function addEmployee() {
             return { name: user.first_name + ' ' + user.last_name, value: user.id }
         })
 
-        // role choices
         db.promise().query('SELECT * FROM role').then(([rows]) => {
             let roleChoices = rows.map(role => {
                 return { name: role.title, value: role.id }
@@ -91,7 +90,6 @@ function addEmployee() {
                         name: 'role_id',
                         type: 'list',
                         message: `What is the employee's ROLE?`,
-                        // could make this dynamically generated later
                         choices: roleChoices
                     },
                     {
@@ -101,11 +99,10 @@ function addEmployee() {
                         choices: employeeChoices,
                     },
                 ]
-            ).then(function (ress) {
-                console.log(ress)
+            ).then(function (res) {
+                console.log(res)
                 const sql = "INSERT INTO employee SET ?";
-
-                db.query(sql, ress, function (err, res, fields) {
+                db.query(sql, res, function (err, res, fields) {
                     if (err) throw err;
                     console.log('Employee added to database.');
                     handleReturn();
@@ -323,10 +320,9 @@ function updateDepartment() {
                 console.log(res)
                 const updateName = function (answer) {
                     const sql = 'UPDATE department SET name = ? WHERE id = ?';
-                    db.query(sql, [answer.newDepartment, res.role], function (err, res, fields) {
+                    db.query(sql, [answer.value, res.role], function (err, res, fields) {
                         if (err) throw err;
                         console.table(res.info);
-                        console.log('Department NAME updated.');
                     });
                     const updateDepartmentId = function (answer) {
                         console.log('Department ID: ', answer)
