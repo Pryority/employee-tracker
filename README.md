@@ -41,4 +41,4 @@ You have the freedom to do as you like with this permissive software, as long as
 
 ## Application Walkthrough Video
 
-![Image of Application](gaisoh)
+[View Walkthrough Tutorial ](https://youtu.be/hD9ngD2OoqM)
