@@ -116,6 +116,7 @@ function addRole() {
         let departmentChoices = rows.map(department => {
             return { name: department.name, value: department.id }
         });
+
         inquirer.prompt(
             [{
                 type: 'input',
@@ -129,7 +130,7 @@ function addRole() {
             },
             {
                 type: 'list',
-                name: 'department_id`',
+                name: 'department_id',
                 message: `Enter the role DEPARTMENT.`,
                 choices: departmentChoices
             }]).then(function (res) {
@@ -225,7 +226,6 @@ function update() {
         switch (res.update) {
             case 'EMPLOYEE':
                 updateEmployee();
-                // updateEmployee();
                 break;
             case 'ROLE':
                 updateRole();
@@ -265,13 +265,13 @@ function updateEmployee() {
                         console.log(roleChoice.role_id);
                         const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
                         db.query(sql, [roleChoice.role_id, res.employee], function (err, res, fields) {
-                            if (err)
-                                throw err;
+                            if (err) throw err;
                             console.table(res.info);
                             console.log('Employee updated.');
                             handleReturn();
                         });
                     };
+
                     inquirer.prompt(
                         {
                             name: 'role_id',
