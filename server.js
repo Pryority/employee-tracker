@@ -110,20 +110,50 @@ function addEmployee() {
             });
         });
     });
-
-
 };
 function addRole() {
-    console.log(`Rendering add role UI`)
+    db.promise().query('SELECT * FROM department').then(([rows]) => {
+        let departmentChoices = rows.map(department => {
+            return { name: department.name, value: department.id }
+        });
+        inquirer.prompt(
+            [{
+                type: 'input',
+                name: 'title',
+                message: `Enter the role TITLE.`,
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: `Enter the role SALARY.`,
+            },
+            {
+                type: 'list',
+                name: 'department_id`',
+                message: `Enter the role DEPARTMENT.`,
+                choices: departmentChoices
+            }]).then(function (res) {
+                console.log(res)
+                const sql = 'INSERT INTO role SET ?'
+                db.query(sql, res, function (err, result, fields) {
+                    if (err) throw err;
+                    console.log('ROLE added to database.');
+                    handleReturn();
+                });
+            });
+    });
 };
 function addDepartment() {
-
     inquirer.prompt({
         type: 'input',
-        name: 'addEmployee',
-        message: `What is the DEPARTMENT name?`,
+        name: 'name',
+        message: `Enter the DEPARTMENT name.`,
     }).then(function (res) {
-        db.query();
+        db.query('INSERT INTO department SET ?', res, function (err, result, fields) {
+            if (err) throw err;
+            console.log('DEPARTMENT added to database.');
+            handleReturn();
+        });
     });
 };
 /// ----------------
